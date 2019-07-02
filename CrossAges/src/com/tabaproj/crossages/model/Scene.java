@@ -33,6 +33,8 @@ public enum Scene {
      * Matriz de tiles, são todos os tiles dos cenario.
      *
      * @see #getTile
+     *
+     * @see Tile
      */
     private final Tile[][] tiles;
 
@@ -99,6 +101,8 @@ public enum Scene {
      * @param y posição em unidade vertical no canario
      * @return o tile na posição x e y no cenario
      * @see #tiles
+     *
+     * @see Tile
      */
     public Tile getTile(int x, int y) {
         return tiles[x][y];
