@@ -14,13 +14,23 @@ import javax.imageio.ImageIO;
 public enum TileModel {
 
     /**
-     * Modelo de tile nullo. Representa a ausencia de um modelo de tile.
+     * Modelo de tile nulo. Representa a ausencia de um modelo de tile.
      */
     NULL("null"),
     /**
      * Modelo de tile que representa o tile de grama.
      */
     GRASS("grass");
+
+    /**
+     * Constante que representa a largura real em pixels de cada tile.
+     */
+    public static final int WIDTH = 16;
+
+    /**
+     * Constante que representa a autura real em pixels de cada tile.
+     */
+    public static final int HEIGHT = 16;
 
     /**
      * É um objeto da classe BufferedImage que representa a imagem do modelo de
