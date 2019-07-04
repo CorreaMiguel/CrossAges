@@ -22,6 +22,7 @@ public class Tile {
      *
      * @param tileModel será o valor atribuido da ao campo tileModel
      *
+     * @see #tileModel
      * @see TileModel
      */
     public Tile(TileModel tileModel) {

@@ -4,15 +4,12 @@ import com.tabaproj.crossages.model.Scene;
 import com.tabaproj.crossages.model.TileModel;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import javax.imageio.ImageIO;
 
 /**
  * Classe responsavel por controlar a ferramenta de edição e criaçao de
  * cenarios.
  *
- * @author jose
+ * @author José Augusto Gomes
  */
 public class Builder {
 
