@@ -1,4 +1,4 @@
-package com.tabaproj.crossages.control;
+package com.tabaproj.crossages.view;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
