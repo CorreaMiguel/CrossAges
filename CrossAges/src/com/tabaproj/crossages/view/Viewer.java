@@ -30,12 +30,12 @@ public class Viewer extends JFrame {
     /**
      * Construtor que cria uma nova instancia da classe.
      *
-     * @param height será o valor atribuidoao campo height
      * @param width será o valor atribuidoao campo height
+     * @param height será o valor atribuidoao campo height
      * @see #height
      * @see #width
      */
-    public Viewer(int height, int width) {
+    public Viewer(int width, int height) {
         //atribuindo aos campos, os valores recebidos por parâmetro
         this.height = height;
         this.width = width;

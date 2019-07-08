@@ -13,6 +13,8 @@ import javax.imageio.ImageIO;
 
 public class SceneMaker extends javax.swing.JFrame {
 
+    
+    
     /**
      * Creates new form NewJFrame
      */
