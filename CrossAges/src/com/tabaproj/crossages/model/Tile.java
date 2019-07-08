@@ -2,8 +2,6 @@ package com.tabaproj.crossages.model;
 
 /**
  * Classe responsavel por representar um tile.
- *
- * @author José Augusto Gomes
  */
 public class Tile {
 

@@ -1,8 +1,6 @@
 package com.tabaproj.crossages.view;
 
 /**
- *
- * @author migue
  */
 import com.tabaproj.crossages.model.TileModel;
 import javax.swing.ImageIcon;

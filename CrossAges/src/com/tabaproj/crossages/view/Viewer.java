@@ -8,8 +8,6 @@ import javax.swing.JLabel;
 
 /**
  * Classe que herda JFrame, responsavel por visualizar um cenario.
- *
- * @author José Augusto Gomes
  */
 public class Viewer extends JFrame {
 
