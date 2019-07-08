@@ -18,9 +18,17 @@ public enum TileModel {
      */
     NULL("null"),
     /**
+     * Modelo de tile que será exibido, quando outro tile model não pode ser carregado.
+     */
+    ERROR("error"),
+    /**
      * Modelo de tile que representa o tile de grama.
      */
-    GRASS("grass");
+    GRASS("grass"),
+    /**
+     * Modelo de tile que representa o tile de areia.
+     */
+    SAND("sand");
 
     /**
      * Constante que representa a largura real em pixels de cada tile.
