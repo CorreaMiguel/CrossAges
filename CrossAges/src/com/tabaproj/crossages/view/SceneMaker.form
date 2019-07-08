@@ -107,7 +107,7 @@
     </Component>
     <Component class="javax.swing.JButton" name="tile2">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Agua"/>
+        <Property name="text" type="java.lang.String" value="Vasio"/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="tile2ActionPerformed"/>

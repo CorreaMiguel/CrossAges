@@ -1,15 +1,10 @@
 package com.tabaproj.crossages.view;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /**
  *
  * @author migue
  */
+import com.tabaproj.crossages.model.TileModel;
 import javax.swing.ImageIcon;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -24,9 +19,9 @@ public class SceneMaker extends javax.swing.JFrame {
     public SceneMaker() throws IOException {
         initComponents();
         sceneImg.setIcon(new ImageIcon(new BufferedImage(800,600,1)));
-        tile0.setIcon(new ImageIcon(ImageIO.read(new File("src/com/tabaproj/crossages/picture/tiles/grass.png"))));
-        tile1.setIcon(new ImageIcon(ImageIO.read(new File("src/com/tabaproj/crossages/picture/tiles/sand.png"))));
-        tile2.setIcon(new ImageIcon(ImageIO.read(new File("src/com/tabaproj/crossages/picture/tiles/error.png"))));
+        tile0.setIcon(new ImageIcon(TileModel.GRASS.getPicture()));
+        tile1.setIcon(new ImageIcon(TileModel.SAND.getPicture()));
+        tile2.setIcon(new ImageIcon(TileModel.NULL.getPicture()));
     }
 
     /**
@@ -73,7 +68,7 @@ public class SceneMaker extends javax.swing.JFrame {
             }
         });
 
-        tile2.setText("Agua");
+        tile2.setText("Vasio");
         tile2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 tile2ActionPerformed(evt);
