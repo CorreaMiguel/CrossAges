@@ -5,8 +5,6 @@ import java.util.Scanner;
 
 /**
  * Classe enumeradora responsavel por representar os cenarios.
- *
- * @author José Augusto Gomes
  */
 public enum Scene {
 

@@ -8,8 +8,6 @@ import javax.imageio.ImageIO;
 
 /**
  * Classe enumeradora responsavel por representar um modelo de tile.
- *
- * @author José Augusto Gomes
  */
 public enum TileModel {
 
