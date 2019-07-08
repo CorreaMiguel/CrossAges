@@ -24,9 +24,9 @@ public class SceneMaker extends javax.swing.JFrame {
     public SceneMaker() throws IOException {
         initComponents();
         sceneImg.setIcon(new ImageIcon(new BufferedImage(800,600,1)));
-        tile0.setIcon(new ImageIcon(ImageIO.read(new File("grass.png"))));
-        tile1.setIcon(new ImageIcon(ImageIO.read(new File("sand.png"))));
-        tile2.setIcon(new ImageIcon(ImageIO.read(new File("null.png"))));
+        tile0.setIcon(new ImageIcon(ImageIO.read(new File("src/com/tabaproj/crossages/picture/tiles/grass.png"))));
+        tile1.setIcon(new ImageIcon(ImageIO.read(new File("src/com/tabaproj/crossages/picture/tiles/sand.png"))));
+        tile2.setIcon(new ImageIcon(ImageIO.read(new File("src/com/tabaproj/crossages/picture/tiles/error.png"))));
     }
 
     /**
