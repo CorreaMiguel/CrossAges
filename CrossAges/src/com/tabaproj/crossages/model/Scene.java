@@ -63,4 +63,8 @@ public class Scene {
         return height;
     }
 
+    public void setTile(int cursorX, int cursorY, TileModel actualTile) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
 }

@@ -21,13 +21,17 @@ public class TileModel {
     public static List<TileModel> importTiles() {
         List<TileModel> tiles = new ArrayList<>();
         File files = new File("CrossAges/data/tiles");
-        for (File f : files.listFiles()) {
-            if (f.isFile() && f.canRead()) {
-                try {
-                    TileModel tile = new TileModel(new FileInputStream(f));
-                    tiles.add(tile);
-                } catch (IOException ex) {
+        if (!files.exists() || files.isFile()) {
+            files.mkdirs();
+        } else {
+            for (File f : files.listFiles()) {
+                if (f.isFile() && f.canRead()) {
+                    try {
+                        TileModel tile = new TileModel(new FileInputStream(f));
+                        tiles.add(tile);
+                    } catch (IOException ex) {
 
+                    }
                 }
             }
         }
@@ -36,7 +40,7 @@ public class TileModel {
 
     public static TileModel getTile(String tile) {
         for (int i = 0; i < models.size(); i++) {
-            if(models.get(i).name.equals(tile)){
+            if (models.get(i).name.equals(tile)) {
                 return models.get(i);
             }
         }

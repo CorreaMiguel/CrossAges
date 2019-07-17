@@ -1,6 +1,7 @@
 package com.tabaproj.crossages.view;
 
 import com.tabaproj.crossages.control.Builder;
+import javax.swing.ImageIcon;
 
 public class ToolsFrame extends javax.swing.JFrame {
 
@@ -12,6 +13,7 @@ public class ToolsFrame extends javax.swing.JFrame {
         jSpinner1.setValue(builder.getSceneWidth());
         jSpinner2.setValue(builder.getSceneHeight());
         setTitle("Ferramentas");
+        updateTile();
         setResizable(false);
     }
 
@@ -24,7 +26,7 @@ public class ToolsFrame extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         jSpinner2 = new javax.swing.JSpinner();
         jLabel3 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
+        tile = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
@@ -34,14 +36,16 @@ public class ToolsFrame extends javax.swing.JFrame {
 
         jLabel1.setText("Largura:");
 
+        jSpinner1.setModel(new javax.swing.SpinnerNumberModel(0, 0, null, 1));
         jSpinner1.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 jSpinner1StateChanged(evt);
             }
         });
 
-        jLabel2.setText("Autura:");
+        jLabel2.setText("Altura:");
 
+        jSpinner2.setModel(new javax.swing.SpinnerNumberModel(0, 0, null, 1));
         jSpinner2.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 jSpinner2StateChanged(evt);
@@ -50,8 +54,8 @@ public class ToolsFrame extends javax.swing.JFrame {
 
         jLabel3.setText("Tile:");
 
-        jLabel4.setForeground(new java.awt.Color(0, 162, 0));
-        jLabel4.setText("...");
+        tile.setForeground(new java.awt.Color(0, 162, 0));
+        tile.setText("...");
 
         jButton1.setText("Escolher");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
@@ -92,7 +96,7 @@ public class ToolsFrame extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(tile, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
@@ -101,7 +105,7 @@ public class ToolsFrame extends javax.swing.JFrame {
                                 .addComponent(jSpinner1, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel2)
-                                .addGap(19, 19, 19)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(jSpinner2, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addComponent(jButton2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -123,7 +127,7 @@ public class ToolsFrame extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
-                    .addComponent(jLabel4))
+                    .addComponent(tile))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -139,19 +143,19 @@ public class ToolsFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
+        builder.chose();
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // TODO add your handling code here:
+        builder.setMode(Builder.COPY);
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        // TODO add your handling code here:
+        builder.setMode(Builder.PUT);
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-        // TODO add your handling code here:
+        builder.setMode(Builder.DESTROY);
     }//GEN-LAST:event_jButton4ActionPerformed
 
     private void jSpinner1StateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_jSpinner1StateChanged
@@ -159,7 +163,7 @@ public class ToolsFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_jSpinner1StateChanged
 
     private void jSpinner2StateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_jSpinner2StateChanged
-        builder.setSceneHeight((int) jSpinner1.getValue());
+        builder.setSceneHeight((int) jSpinner2.getValue());
     }//GEN-LAST:event_jSpinner2StateChanged
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -170,8 +174,15 @@ public class ToolsFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
     private javax.swing.JSpinner jSpinner1;
     private javax.swing.JSpinner jSpinner2;
+    private javax.swing.JLabel tile;
     // End of variables declaration//GEN-END:variables
+
+    public void updateTile() {
+        tile.setText(builder.getActualTile() == null ? "NULL" : builder.getActualTile().getName());
+        if (builder.getActualTile() != null) {
+            tile.setIcon(new ImageIcon(builder.getActualTile().getPicture()));
+        }
+    }
 }
