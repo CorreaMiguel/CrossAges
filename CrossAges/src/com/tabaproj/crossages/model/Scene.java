@@ -1,6 +1,10 @@
 package com.tabaproj.crossages.model;
 
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Scene {
@@ -17,12 +21,11 @@ public class Scene {
         this.tiles = new Tile[width][height];
     }
 
-    private Scene(String source) {
+    private Scene(InputStream input) {
         int width = 0;
         int height = 0;
         Tile[][] tiles = null;
         try {
-            InputStream input = TileModel.class.getResourceAsStream("../scenes/" + source + ".scn");
             Scanner scanner = new Scanner(input);
             int tilesMapCount = scanner.nextInt();
             TileModel[] tilesMap = new TileModel[tilesMapCount];
@@ -45,6 +48,32 @@ public class Scene {
         this.width = width;
         this.height = height;
         this.tiles = tiles;
+    }
+
+    public void export(PrintStream out) {
+        List<TileModel> map = new ArrayList<>();
+        for (int x = 0; x < tiles.length; x++) {
+            for (int y = 0; y < tiles[x].length; y++) {
+                if (!map.contains(tiles[x][y])) {
+                    map.add(tiles[x][y].getTileModel());
+                }
+            }
+        }
+        out.println(map.size());
+        for (int i = 0; i < map.size(); i++) {
+            out.println(map.get(i));
+        }
+        out.printf("%d %d\n", width, height);
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                out.printf("%d ", map.indexOf(tiles[x][y]));
+            }
+            out.println();
+        }
+    }
+
+    public void export(OutputStream out) {
+        export(new PrintStream(out));
     }
 
     public void setTile(int x, int y, Tile tile) {

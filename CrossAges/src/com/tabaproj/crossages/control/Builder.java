@@ -52,7 +52,9 @@ public class Builder {
 
             @Override
             public void mousePressed(MouseEvent e) {
-                click();
+                if (!e.isShiftDown()) {
+                    click();
+                }
             }
 
             @Override
@@ -97,13 +99,13 @@ public class Builder {
     }
 
     public BufferedImage renderFrame(int startX, int startY, int width, int height) {
-        startX += locationX;
-        startY += locationY;
         BufferedImage frame = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         int tileStartX = startX / TileModel.WIDTH;
         int tileStartY = startY / TileModel.HEIGHT;
         int tileWidth = width / TileModel.WIDTH + 1;
         int tileHeight = height / TileModel.HEIGHT + 1;
+        startX += locationX;
+        startY += locationY;
         Graphics graphics = frame.getGraphics();
         graphics.setColor(Color.white);
         for (int x = 0; x < scene.getWidth(); x++) {
@@ -117,8 +119,8 @@ public class Builder {
         graphics.setColor(Color.white);
         for (int x = tileStartX; x < tileWidth && x < scene.getWidth(); x++) {
             for (int y = tileStartY; y < tileHeight && y < scene.getHeight(); y++) {
-                int pixX = x * TileModel.WIDTH - startX;
-                int pixY = y * TileModel.HEIGHT - startY;
+                int pixX = x * TileModel.WIDTH + startX;
+                int pixY = y * TileModel.HEIGHT + startY;
                 if (x >= 0 && y >= 0 && x < scene.getWidth() && y < scene.getHeight()) {
                     Tile model = model = scene.getTile(x, y);
                     if (model != null && model.getTileModel() != null) {
@@ -275,6 +277,7 @@ public class Builder {
             }
         } else if (mode == COPY) {
             setActualTile(scene.getTile(cursorX, cursorY).getTileModel());
+            mode = PUT;
         }
     }
 }

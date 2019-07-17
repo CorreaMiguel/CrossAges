@@ -26,8 +26,8 @@ public class TileModel {
         } else {
             for (File f : files.listFiles()) {
                 if (f.isFile() && f.canRead()) {
-                    try {
-                        TileModel tile = new TileModel(new FileInputStream(f));
+                    try (InputStream in = new FileInputStream(f)) {
+                        TileModel tile = new TileModel(in);
                         tiles.add(tile);
                     } catch (IOException ex) {
 
@@ -66,8 +66,9 @@ public class TileModel {
                 switch (field) {
                     case "picture":
                         String pictureSource = tokens[1];
-                        InputStream pictureInput = TileModel.class.getResourceAsStream("../picture/tiles/" + pictureSource + ".png");
+                        InputStream pictureInput = new FileInputStream("CrossAges/picture/tiles/" + pictureSource + ".png");
                         picture = ImageIO.read(pictureInput);
+                        pictureInput.close();
                         break;
                     case "solid":
                         String stringIsSolid = tokens[1];
