@@ -34,14 +34,16 @@ public class ToolsFrame extends javax.swing.JFrame {
 
         jLabel1.setText("Largura:");
 
+        jSpinner1.setModel(new javax.swing.SpinnerNumberModel(0, 0, null, 1));
         jSpinner1.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 jSpinner1StateChanged(evt);
             }
         });
 
-        jLabel2.setText("Autura:");
+        jLabel2.setText("Altura:");
 
+        jSpinner2.setModel(new javax.swing.SpinnerNumberModel(0, 0, null, 1));
         jSpinner2.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 jSpinner2StateChanged(evt);
@@ -101,7 +103,7 @@ public class ToolsFrame extends javax.swing.JFrame {
                                 .addComponent(jSpinner1, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel2)
-                                .addGap(19, 19, 19)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(jSpinner2, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addComponent(jButton2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -159,7 +161,7 @@ public class ToolsFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_jSpinner1StateChanged
 
     private void jSpinner2StateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_jSpinner2StateChanged
-        builder.setSceneHeight((int) jSpinner1.getValue());
+        builder.setSceneHeight((int) jSpinner2.getValue());
     }//GEN-LAST:event_jSpinner2StateChanged
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
