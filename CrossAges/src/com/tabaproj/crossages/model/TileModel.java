@@ -1,140 +1,101 @@
 package com.tabaproj.crossages.model;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import javax.imageio.ImageIO;
 
-/**
- * Classe enumeradora responsavel por representar um modelo de tile.
- */
-public enum TileModel {
+public class TileModel {
 
-    /**
-     * Modelo de tile nulo. Representa a ausencia de um modelo de tile.
-     */
-    NULL("null"),
-    /**
-     * Modelo de tile que será exibido, quando outro tile model não pode ser carregado.
-     */
-    ERROR("error"),
-    /**
-     * Modelo de tile que representa o tile de grama.
-     */
-    GRASS("grass"),
-    /**
-     * Modelo de tile que representa o tile de areia.
-     */
-    SAND("sand");
+    private static final List<TileModel> models = importTiles();
 
-    /**
-     * Constante que representa a largura real em pixels de cada tile.
-     */
     public static final int WIDTH = 16;
 
-    /**
-     * Constante que representa a autura real em pixels de cada tile.
-     */
     public static final int HEIGHT = 16;
 
-    /**
-     * É um objeto da classe BufferedImage que representa a imagem do modelo de
-     * tile
-     *
-     * @see #getPicture
-     *
-     */
-    private final BufferedImage picture;
+    public static List<TileModel> importTiles() {
+        List<TileModel> tiles = new ArrayList<>();
+        File files = new File("CrossAges/data/tiles");
+        for (File f : files.listFiles()) {
+            if (f.isFile() && f.canRead()) {
+                try {
+                    TileModel tile = new TileModel(new FileInputStream(f));
+                    tiles.add(tile);
+                } catch (IOException ex) {
 
-    /**
-     * Indica se o modelo de tile permite que sprite passem por ele.
-     *
-     * @see #isSolid
-     */
-    private final boolean solid;
-
-    /**
-     * Construtor responsavel por criar uma nova instancia da da classe.
-     *
-     * @param source é o caminho sem a extenção dentro do pacote
-     * "com.tabaproj.crossages.data.tiles" do arquivo de formato "data" que
-     * contem as informações basicas do novo modelo de tile. Exemplo: "null"
-     */
-    TileModel(String source) {
-        //importação do aquivo do tile
-        //criando variavel local que será atribuida a constante solid que terá o valor falso como padrao
-        boolean solid = false;
-        //criando variavel local que será atribuida a constante picture que terá o valor nulo como padrao
-        BufferedImage picture = null;
-        //tentando importar o arquivo
-        try {
-            //obtendo entrada de fluxo do arquivo source
-            InputStream input = TileModel.class.getResourceAsStream("../data/tiles/" + source + ".data");
-            //criando um objeto Scanner para ler o arquivo source
-            Scanner scanner = new Scanner(input);
-            //variavel do tipo String que armazenará as linha do arquivo
-            String line;
-            //loop que lê linha por linha do arquivo.
-            //continua o loop caso o arquivo ainda tiver ao menos uma linha para ler.
-            while (scanner.hasNext()) {
-                //lendo uma linha do arquivo
-                line = scanner.nextLine();
-                //criando um vetor de string que recebe a linha separada por ":"
-                String[] tokens = line.split(":");
-                //verificando se a quantidade de tokens é igual a 2 
-                if (tokens.length == 2) {
-                    //obtendo o primeiro token da linha que representa o nome do campo
-                    String field = tokens[0];
-                    //atribuindo o valor de um atributo dependendo do valor da variavel field
-                    switch (field) {
-                        case "picture":
-                            //obtendo o segundo token da linha que representa o valor do campo
-                            String pictureSource = tokens[1];
-                            //obtendo entrada de fluxo do arquivo de imagem do modelo de tile
-                            InputStream pictureInput = TileModel.class.getResourceAsStream("../picture/tiles/" + pictureSource + ".png");
-                            //definindo o valor de picture apartir da imagem obtida no arquivo
-                            picture = ImageIO.read(pictureInput);
-                            break;
-                        case "solid":
-                            //obtendo o segundo token da linha que representa o valor do campo
-                            String stringIsSolid = tokens[1];
-                            //definindo o valor de solid apartir da conversão do token obtido
-                            solid = Boolean.parseBoolean(stringIsSolid);
-                            break;
-                        default:
-                            break;
-                    }
                 }
             }
-        } catch (IOException ex) {
-            //caso algo dê errado na leitura do arquivo
-            System.err.println("Erro, não foi possivel importar o tile model " + this.name() + "\n" + ex.getMessage());
         }
-        //atribuindo o valor da variavel local picture, para o campo picture
-        this.picture = picture;
-        //atribuindo o valor da variavel local solid, para o campo solid
-        this.solid = solid;
+        return tiles;
     }
 
-    /**
-     * Obtem image correspondente à sua variante.
-     *
-     * @return valor do campo picture
-     * @see #picture
-     */
+    public static TileModel getTile(String tile) {
+        for (int i = 0; i < models.size(); i++) {
+            if(models.get(i).name.equals(tile)){
+                return models.get(i);
+            }
+        }
+        return null;
+    }
+
+    private final String name;
+    private final BufferedImage picture;
+
+    private final boolean solid;
+
+    private TileModel(InputStream input) throws IOException {
+        boolean solid = false;
+        String name = "";
+        BufferedImage picture = null;
+        Scanner scanner = new Scanner(input);
+        String line;
+        while (scanner.hasNext()) {
+            line = scanner.nextLine();
+            String[] tokens = line.split(":");
+            if (tokens.length == 2) {
+                String field = tokens[0];
+                switch (field) {
+                    case "picture":
+                        String pictureSource = tokens[1];
+                        InputStream pictureInput = TileModel.class.getResourceAsStream("../picture/tiles/" + pictureSource + ".png");
+                        picture = ImageIO.read(pictureInput);
+                        break;
+                    case "solid":
+                        String stringIsSolid = tokens[1];
+                        solid = Boolean.parseBoolean(stringIsSolid);
+                        break;
+                    case "name":
+                        name = tokens[1];
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        this.picture = picture;
+        this.solid = solid;
+        this.name = name;
+    }
+
     public BufferedImage getPicture() {
         return picture;
     }
 
-    /**
-     * Retorna o valor do campo solid.
-     *
-     * @return o valor do campo solid
-     * @see #solid
-     */
     public boolean isSolid() {
         return solid;
+    }
+
+    public static List<TileModel> getModels() {
+        return models;
+    }
+
+    public String getName() {
+        return name;
     }
 
 }
