@@ -1,219 +1,184 @@
 package com.tabaproj.crossages.control;
 
 import com.tabaproj.crossages.model.Scene;
+import com.tabaproj.crossages.model.Tile;
 import com.tabaproj.crossages.model.TileModel;
+import com.tabaproj.crossages.view.ToolsFrame;
 import com.tabaproj.crossages.view.Viewer;
+import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 
-/**
- * Classe responsavel por controlar a ferramenta de edição e criaçao de
- * cenarios.
- *
- * @author José Augusto Gomes
- */
 public class Builder {
 
-    /**
-     * Constante width representa o tamanho real em pixels da largura da janela
-     * visualizadora.
-     *
-     */
     public static final int WIDTH = 800;
 
-    /**
-     * Constante width representa o tamanho real em pixels da autura da janela
-     * visualizadora.
-     *
-     */
     public static final int HEIGHT = 600;
 
-    /**
-     * Campo viewer será a janela em que será possivel uma previsialização do
-     * cenario.
-     *
-     */
+    private Scene scene;
+    private final ToolsFrame tools;
     private final Viewer viewer;
-    /**
-     * Representa a largura em unidade de tiles do cenário.
-     *
-     * @see #getSceneWidth
-     * @see #setSceneWidth
-     */
+
     private int sceneWidth;
-    /**
-     * Representa a autura em unidade de tiles do cenário.
-     *
-     * @see #getSceneHeight
-     * @see #setSceneHeight
-     */
+
     private int sceneHeight;
+    private int locationX = 0;
+    private int locationY = 0;
+    private int cursorX = -1;
+    private int cursorY = -1;
 
-    private TileModel[][] tiles;
-
-    /**
-     * Construtor que recebe o tamanho do cenário à ser criado.
-     *
-     * @param sceneWidth a largura em unidade de tiles do cenário.
-     * @param sceneHeight a autura em unidade de tiles do cenário.
-     * @see #sceneWidth
-     * @see #sceneHeight
-     */
     public Builder(int sceneWidth, int sceneHeight) {
         this.sceneWidth = sceneWidth;
         this.sceneHeight = sceneHeight;
-        //criando matriz de tiles
-        this.tiles = new TileModel[sceneWidth][sceneHeight];
-        //cria uma janela visualizadora de tamanho padrão
+        this.scene = new Scene(sceneWidth, sceneHeight);
         this.viewer = new Viewer(WIDTH, HEIGHT);
-        this.viewer.setFrame(renderFrame(0,0,WIDTH,HEIGHT));
         this.viewer.setDefaultCloseOperation(Viewer.EXIT_ON_CLOSE);
         this.viewer.setVisible(true);
+        this.tools = new ToolsFrame(this);
+        this.tools.setDefaultCloseOperation(Viewer.EXIT_ON_CLOSE);
+        this.tools.setLocation(viewer.getLocation().x - tools.getWidth() - 30, viewer.getLocation().y);
+        this.viewer.addMouseMotionListener(new MouseMotionListener() {
+            int x = 0, y = 0;
+
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                if (e.isShiftDown()) {
+                    setLocationX(getLocationX() + e.getX() - x);
+                    setLocationY(getLocationY() + e.getY() - y);
+                }
+                setCursorX(e.getX());
+                setCursorY((e.getY() - 30));
+                x = e.getX();
+                y = e.getY();
+            }
+
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                setCursorX(e.getX());
+                setCursorY((e.getY() - 30));
+                x = e.getX();
+                y = e.getY();
+            }
+        });
+        update();
+        this.tools.setVisible(true);
     }
 
-    /**
-     * Renderiza um frame(quadro) da simulação do cenario, apartir de um objeto
-     * Scene.
-     *
-     * @param scene cenario que será renderizado
-     * @param startX pocição horizontal em pixels de onde começa a simulação
-     * @param startY pocição vertical em pixels de onde começa a simulação
-     * @param width largura em pixels do frame que será renderizado
-     * @param height autura em pixels do frame que será renderizado
-     * @return um objeto da classe BufferedImage correspondente ao frame
-     * renderizado
-     *
-     * @see Scene
-     */
-    public static BufferedImage renderFrame(Scene scene, int startX, int startY, int width, int height) {
-        //criando nova imagem correspondente ao frame que será retornardo
+    public BufferedImage renderFrame(int startX, int startY, int width, int height) {
+        startX += locationX;
+        startY += locationY;
         BufferedImage frame = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        //convertendo os valores de pixels para unidades de tiles, e pegando apenas a parte inteira
         int tileStartX = startX / TileModel.WIDTH;
         int tileStartY = startY / TileModel.HEIGHT;
         int tileWidth = width / TileModel.WIDTH + 1;
         int tileHeight = height / TileModel.HEIGHT + 1;
-        //obtendo objeto grafics da image, que será utilizado para desenha na imagem
         Graphics graphics = frame.getGraphics();
-        //loop para desenhar cada tile do enario
+        graphics.setColor(Color.white);
+        for (int x = 0; x < scene.getWidth(); x++) {
+            graphics.drawLine(startX + x * TileModel.WIDTH, startY, startX + x * TileModel.WIDTH, startY + scene.height * TileModel.HEIGHT);
+        }
+        for (int y = 0; y < scene.getHeight(); y++) {
+            graphics.drawLine(startX, startY + y * TileModel.HEIGHT, startX + scene.width * TileModel.WIDTH, startY + y * TileModel.HEIGHT);
+        }
+        graphics.setColor(Color.blue);
+        graphics.drawRect(startX, startY, scene.width * TileModel.WIDTH, scene.height * TileModel.HEIGHT);
+        graphics.setColor(Color.red);
+        int cursorX = (this.cursorX - startX) / TileModel.WIDTH, cursorY = (this.cursorY - startY) / TileModel.HEIGHT;
+        if (cursorX >= 0 && cursorY >= 0 && cursorX < scene.width && cursorY < scene.height) {
+            graphics.drawRect(cursorX * TileModel.WIDTH + startX, cursorY * TileModel.HEIGHT + startY, TileModel.WIDTH, TileModel.HEIGHT);
+        }
+        graphics.setColor(Color.white);
         for (int x = tileStartX; x < tileWidth && x < scene.getWidth(); x++) {
             for (int y = tileStartY; y < tileHeight && y < scene.getHeight(); y++) {
-                //obtendo os valores em pixels para desenhar
                 int pixX = x * TileModel.WIDTH - startX;
                 int pixY = y * TileModel.HEIGHT - startY;
-                //obtendo a imagem do respectivo tile
-                TileModel model = TileModel.NULL;
-                if (scene.getTile(x, y).getTileModel() != null) {
-                    //obtendo o respectivo modelo de tile caso não for nulo.
-                    model = scene.getTile(x, y).getTileModel();
+                if (x >= 0 && y >= 0 && x < scene.getWidth() && y < scene.getHeight()) {
+                    Tile model = model = scene.getTile(x, y);
+                    if (model != null && model.getTileModel() != null) {
+                        BufferedImage tile = model.getTileModel().getPicture();
+                        graphics.drawImage(tile, pixX, pixY, TileModel.WIDTH, TileModel.HEIGHT, null);
+                    }
                 }
-                //obtendo a imagem do respectivo tile
-                BufferedImage tile = model.getPicture();
-                //desenhando o tile no frame
-                graphics.drawImage(tile, pixX, pixY, TileModel.WIDTH, TileModel.HEIGHT, null);
             }
         }
-        //encerrando o uso do objeto graphics
         graphics.dispose();
         return frame;
     }
 
-    /**
-     * Renderiza um frame(quadro) da simulação do cenario, apartir de uma
-     * instancia de builder.
-     *
-     * @param startX pocição horizontal em pixels de onde começa a simulação
-     * @param startY pocição vertical em pixels de onde começa a simulação
-     * @param width largura em pixels do frame que será renderizado
-     * @param height autura em pixels do frame que será renderizado
-     * @return um objeto da classe BufferedImage correspondente ao frame
-     * renderizado
-     *
-     */
-    public BufferedImage renderFrame(int startX, int startY, int width, int height) {
-        //criando nova imagem correspondente ao frame que será retornardo
-        BufferedImage frame = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        //convertendo os valores de pixels para unidades de tiles, e pegando apenas a parte inteira
-        int tileStartX = startX / TileModel.WIDTH;
-        int tileStartY = startY / TileModel.HEIGHT;
-        int tileWidth = width / TileModel.WIDTH + 1;
-        int tileHeight = height / TileModel.HEIGHT + 1;
-        //obtendo objeto grafics da image, que será utilizado para desenha na imagem
-        Graphics graphics = frame.getGraphics();
-        //loop para desenhar cada tile do enario
-        for (int x = tileStartX; x < tileWidth && x < getSceneWidth(); x++) {
-            for (int y = tileStartY; y < tileHeight && y < getSceneHeight(); y++) {
-                //obtendo os valores em pixels para desenhar
-                int pixX = x * TileModel.WIDTH - startX;
-                int pixY = y * TileModel.HEIGHT - startY;
-                TileModel model = TileModel.NULL;
-                if (tiles[x][y] != null) {
-                    //obtendo o respectivo modelo de tile caso não for nulo.
-                    model = tiles[x][y];
-                }
-                //obtendo a imagem do respectivo tile
-                BufferedImage tile = model.getPicture();
-                //desenhando o tile no frame
-                graphics.drawImage(tile, pixX, pixY, TileModel.WIDTH, TileModel.HEIGHT, null);
-            }
-        }
-        //encerrando o uso do objeto graphics
-        graphics.dispose();
-        return frame;
-    }
-
-    /**
-     * Obtem a largura em unidade de tiles do cenário.
-     *
-     * @return valor do campo sceneWidth
-     * @see #sceneWidth
-     */
     public int getSceneWidth() {
         return sceneWidth;
     }
 
-    /**
-     * Define a largura em unidade de tiles do cenário.
-     *
-     * @param sceneWidth novo valor para a largura do cenário
-     * @see #sceneWidth
-     */
     public void setSceneWidth(int sceneWidth) {
         this.sceneWidth = sceneWidth;
         resizeTiles();
     }
 
-    /**
-     * Obtem a autura em unidade de tiles do cenário.
-     *
-     * @return valor do campo sceneHeight
-     * @see #sceneHeight
-     */
     public int getSceneHeight() {
         return sceneHeight;
     }
 
-    /**
-     * Define a autura em unidade de tiles do cenário.
-     *
-     * @param sceneHeight novo valor para a autura do cenário
-     * @see #sceneHeight
-     */
     public void setSceneHeight(int sceneHeight) {
         this.sceneHeight = sceneHeight;
         resizeTiles();
     }
 
     private void resizeTiles() {
-        TileModel[][] newTiles = new TileModel[sceneWidth][sceneHeight];
-        for (int x = 0; x < sceneWidth && x < tiles.length; x++) {
-            for (int y = 0; y < sceneHeight && y < tiles[x].length; y++) {
-                newTiles[x][y] = this.tiles[x][y];
+        Scene newScene = new Scene(sceneWidth, sceneHeight);
+        for (int x = 0; x < sceneWidth && x < scene.getWidth(); x++) {
+            for (int y = 0; y < sceneHeight && y < scene.getHeight(); y++) {
+                newScene.setTile(x, y, scene.getTile(x, y));
             }
         }
-        this.tiles = newTiles;
+        this.scene = newScene;
+        update();
     }
-    public static void main(String[] args) {
-        new Builder(64,64);
+
+    public static void main(String... args) {
+        new Builder(30, 20);
+    }
+
+    public int getCursorX() {
+        return cursorX;
+    }
+
+    public void setCursorX(int cursorX) {
+        this.cursorX = cursorX;
+        update();
+
+    }
+
+    public int getCursorY() {
+        return cursorY;
+    }
+
+    public void setCursorY(int cursorY) {
+        this.cursorY = cursorY;
+        update();
+
+    }
+
+    public void update() {
+        viewer.setFrame(renderFrame(0, 0, WIDTH, HEIGHT));
+    }
+
+    public int getLocationX() {
+        return locationX;
+    }
+
+    public void setLocationX(int locationX) {
+        this.locationX = locationX;
+        update();
+    }
+
+    public int getLocationY() {
+        return locationY;
+    }
+
+    public void setLocationY(int locationY) {
+        this.locationY = locationY;
+        update();
     }
 }
