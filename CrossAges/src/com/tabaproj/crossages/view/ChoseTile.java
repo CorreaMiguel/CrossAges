@@ -1,7 +1,7 @@
 package com.tabaproj.crossages.view;
 
 import com.tabaproj.crossages.control.Builder;
-import com.tabaproj.crossages.model.TileModel;
+import com.tabaproj.tabaengine.model.TileModel;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import javax.swing.ImageIcon;
