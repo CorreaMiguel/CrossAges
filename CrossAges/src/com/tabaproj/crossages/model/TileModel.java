@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -25,7 +27,7 @@ public class TileModel {
             files.mkdirs();
         } else {
             for (File f : files.listFiles()) {
-                if (f.isFile() && f.canRead()) {
+                if (f.isFile() && f.canRead() && f.getAbsoluteFile().getPath().toLowerCase().endsWith(".data")) {
                     try (InputStream in = new FileInputStream(f)) {
                         TileModel tile = new TileModel(in);
                         tiles.add(tile);
@@ -39,6 +41,9 @@ public class TileModel {
     }
 
     public static TileModel getTile(String tile) {
+        if (tile.equalsIgnoreCase("null")) {
+            return null;
+        }
         for (int i = 0; i < models.size(); i++) {
             if (models.get(i).name.equals(tile)) {
                 return models.get(i);
@@ -51,10 +56,12 @@ public class TileModel {
     private final BufferedImage picture;
 
     private final boolean solid;
+    private final String pictureSource;
 
     private TileModel(InputStream input) throws IOException {
         boolean solid = false;
         String name = "";
+        String pictureSource = "";
         BufferedImage picture = null;
         Scanner scanner = new Scanner(input);
         String line;
@@ -65,7 +72,7 @@ public class TileModel {
                 String field = tokens[0];
                 switch (field) {
                     case "picture":
-                        String pictureSource = tokens[1];
+                        pictureSource = tokens[1];
                         InputStream pictureInput = new FileInputStream("CrossAges/picture/tiles/" + pictureSource + ".png");
                         picture = ImageIO.read(pictureInput);
                         pictureInput.close();
@@ -82,9 +89,29 @@ public class TileModel {
                 }
             }
         }
+        this.pictureSource = pictureSource;
         this.picture = picture;
         this.solid = solid;
         this.name = name;
+    }
+
+    public void export(PrintStream out) {
+        out.printf("name:%s\n", name);
+        out.printf("picture:%s\n", pictureSource);
+        File picture = new File("CrossAges/picture/tiles/" + pictureSource + ".png");
+        if (picture.isDirectory()) {
+            picture.delete();
+            picture.getParentFile().mkdirs();
+            try {
+                ImageIO.write(this.picture, "png", picture);
+            } catch (IOException ex) {
+            }
+        }
+        out.printf("solid:%s\n", String.valueOf(solid));
+    }
+
+    public void export(OutputStream out) {
+        export(new PrintStream(out));
     }
 
     public BufferedImage getPicture() {
@@ -100,6 +127,11 @@ public class TileModel {
     }
 
     public String getName() {
+        return name;
+    }
+
+    @Override
+    public String toString() {
         return name;
     }
 

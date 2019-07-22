@@ -23,7 +23,12 @@ public class ChoseTile extends javax.swing.JFrame {
             jbutton.setBounds(x * (TileModel.WIDTH + 10) + 4, y * (TileModel.HEIGHT + 10) + 4, TileModel.WIDTH + 6, TileModel.HEIGHT + 6);
             final int index = i;
             jbutton.addActionListener((ActionEvent e) -> {
-                setTile(TileModel.getModels().get(index));
+                TileModel t = TileModel.getModels().get(index);
+                if (t.equals(getTile())) {
+                    builder.setActualTile(tile);
+                    setVisible(false);
+                }
+                setTile(t);
             });
             jPanel1.add(jbutton);
         }
@@ -44,8 +49,6 @@ public class ChoseTile extends javax.swing.JFrame {
         jButton1 = new javax.swing.JButton();
         jLabel3 = new javax.swing.JLabel();
         tileName = new javax.swing.JLabel();
-
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -96,11 +99,11 @@ public class ChoseTile extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton1)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabel3)
-                        .addComponent(tileName)))
+                        .addComponent(tileName))
+                    .addComponent(jButton1))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -109,7 +112,7 @@ public class ChoseTile extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         builder.setActualTile(tile);
-        dispose();
+        setVisible(false);
     }//GEN-LAST:event_jButton1ActionPerformed
 
 

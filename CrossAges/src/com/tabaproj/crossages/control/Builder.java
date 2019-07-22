@@ -1,5 +1,7 @@
 package com.tabaproj.crossages.control;
 
+import com.tabaproj.crossages.model.SceneFileFilter;
+import com.tabaproj.crossages.model.PNGImageFileFilter;
 import com.tabaproj.crossages.model.Scene;
 import com.tabaproj.crossages.model.Tile;
 import com.tabaproj.crossages.model.TileModel;
@@ -11,7 +13,19 @@ import java.awt.Graphics;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.imageio.ImageIO;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 public class Builder {
 
@@ -21,6 +35,8 @@ public class Builder {
 
     public static final int HEIGHT = 600;
 
+    private File file = null;
+    private boolean saved;
     private Scene scene;
     private TileModel actualTile = null;
     private int mode = 1;
@@ -34,17 +50,77 @@ public class Builder {
     private int locationY = 0;
     private int cursorX = -1;
     private int cursorY = -1;
+    private ChoseTile choseTile;
 
     public Builder(int sceneWidth, int sceneHeight) {
         this.sceneWidth = sceneWidth;
         this.sceneHeight = sceneHeight;
         this.scene = new Scene(sceneWidth, sceneHeight);
         this.viewer = new Viewer(WIDTH, HEIGHT);
-        this.viewer.setDefaultCloseOperation(Viewer.EXIT_ON_CLOSE);
-        this.viewer.setVisible(true);
+        this.viewer.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         this.tools = new ToolsFrame(this);
-        this.tools.setDefaultCloseOperation(Viewer.EXIT_ON_CLOSE);
+        this.tools.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         this.tools.setLocation(viewer.getLocation().x - tools.getWidth() - 30, viewer.getLocation().y);
+        this.tools.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {
+            }
+
+            @Override
+            public void windowClosing(WindowEvent e) {
+                exit();
+            }
+
+            @Override
+            public void windowClosed(WindowEvent e) {
+            }
+
+            @Override
+            public void windowIconified(WindowEvent e) {
+            }
+
+            @Override
+            public void windowDeiconified(WindowEvent e) {
+            }
+
+            @Override
+            public void windowActivated(WindowEvent e) {
+            }
+
+            @Override
+            public void windowDeactivated(WindowEvent e) {
+            }
+        });
+        this.viewer.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {
+            }
+
+            @Override
+            public void windowClosing(WindowEvent e) {
+                exit();
+            }
+
+            @Override
+            public void windowClosed(WindowEvent e) {
+            }
+
+            @Override
+            public void windowIconified(WindowEvent e) {
+            }
+
+            @Override
+            public void windowDeiconified(WindowEvent e) {
+            }
+
+            @Override
+            public void windowActivated(WindowEvent e) {
+            }
+
+            @Override
+            public void windowDeactivated(WindowEvent e) {
+            }
+        });
         this.viewer.addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -94,44 +170,29 @@ public class Builder {
                 y = e.getY();
             }
         });
+        this.choseTile = new ChoseTile(this);
         update();
         this.tools.setVisible(true);
+        this.viewer.setVisible(true);
+        saved = true;
     }
 
-    public BufferedImage renderFrame(int startX, int startY, int width, int height) {
-        BufferedImage frame = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        int tileStartX = startX / TileModel.WIDTH;
-        int tileStartY = startY / TileModel.HEIGHT;
-        int tileWidth = width / TileModel.WIDTH + 1;
-        int tileHeight = height / TileModel.HEIGHT + 1;
-        startX += locationX;
-        startY += locationY;
+    public BufferedImage renderFrame() {
+        BufferedImage frame = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_ARGB);
         Graphics graphics = frame.getGraphics();
         graphics.setColor(Color.white);
         for (int x = 0; x < scene.getWidth(); x++) {
-            graphics.drawLine(startX + x * TileModel.WIDTH, startY, startX + x * TileModel.WIDTH, startY + scene.height * TileModel.HEIGHT);
+            graphics.drawLine(locationX + x * TileModel.WIDTH, locationY, locationX + x * TileModel.WIDTH, locationY + scene.height * TileModel.HEIGHT);
         }
         for (int y = 0; y < scene.getHeight(); y++) {
-            graphics.drawLine(startX, startY + y * TileModel.HEIGHT, startX + scene.width * TileModel.WIDTH, startY + y * TileModel.HEIGHT);
+            graphics.drawLine(locationX, locationY + y * TileModel.HEIGHT, locationX + scene.width * TileModel.WIDTH, locationY + y * TileModel.HEIGHT);
         }
         graphics.setColor(Color.blue);
-        graphics.drawRect(startX, startY, scene.width * TileModel.WIDTH, scene.height * TileModel.HEIGHT);
+        graphics.drawRect(locationX, locationY, scene.width * TileModel.WIDTH, scene.height * TileModel.HEIGHT);
         graphics.setColor(Color.white);
-        for (int x = tileStartX; x < tileWidth && x < scene.getWidth(); x++) {
-            for (int y = tileStartY; y < tileHeight && y < scene.getHeight(); y++) {
-                int pixX = x * TileModel.WIDTH + startX;
-                int pixY = y * TileModel.HEIGHT + startY;
-                if (x >= 0 && y >= 0 && x < scene.getWidth() && y < scene.getHeight()) {
-                    Tile model = model = scene.getTile(x, y);
-                    if (model != null && model.getTileModel() != null) {
-                        BufferedImage tile = model.getTileModel().getPicture();
-                        graphics.drawImage(tile, pixX, pixY, TileModel.WIDTH, TileModel.HEIGHT, null);
-                    }
-                }
-            }
-        }
+        scene.draw(graphics, locationX, locationY);
         graphics.setColor(new Color(255, 0, 0, 196));
-        int cursorX = this.cursorX * TileModel.WIDTH + startX, cursorY = this.cursorY * TileModel.HEIGHT + startY;
+        int cursorX = this.cursorX * TileModel.WIDTH + locationX, cursorY = this.cursorY * TileModel.HEIGHT + locationY;
         if (cursorX >= 0 && cursorY >= 0 && cursorX < scene.width * TileModel.WIDTH && cursorY < scene.height * TileModel.HEIGHT) {
             switch (mode) {
                 case DESTROY:
@@ -170,15 +231,6 @@ public class Builder {
         update();
     }
 
-    public Scene getScene() {
-        return scene;
-    }
-
-    public void setScene(Scene scene) {
-        this.scene = scene;
-        update();
-    }
-
     public TileModel getActualTile() {
         return actualTile;
     }
@@ -186,6 +238,7 @@ public class Builder {
     public void setActualTile(TileModel actualTile) {
         this.actualTile = actualTile;
         tools.updateTile();
+        update();
     }
 
     public int getSceneWidth() {
@@ -195,6 +248,7 @@ public class Builder {
     public void setSceneWidth(int sceneWidth) {
         this.sceneWidth = sceneWidth;
         resizeTiles();
+        saved = false;
     }
 
     public int getSceneHeight() {
@@ -204,6 +258,7 @@ public class Builder {
     public void setSceneHeight(int sceneHeight) {
         this.sceneHeight = sceneHeight;
         resizeTiles();
+        saved = false;
     }
 
     private void resizeTiles() {
@@ -217,7 +272,15 @@ public class Builder {
         update();
     }
 
-    public static void main(String... args) {
+    public static void main(String[] args) {
+        File dataTiles = new File("CrossAges/data/tiles");
+        File dataPicture = new File("CrossAges/picture/tiles");
+        if (!dataPicture.exists()) {
+            dataPicture.mkdirs();
+        }
+        if (!dataTiles.exists()) {
+            dataTiles.mkdirs();
+        }
         new Builder(48, 36);
     }
 
@@ -226,7 +289,10 @@ public class Builder {
     }
 
     public void setCursorX(int cursorX) {
-        this.cursorX = (cursorX - locationX) / TileModel.WIDTH;
+        cursorX = (cursorX - locationX) / TileModel.WIDTH;
+        if (cursorX >= 0 && cursorX < scene.width) {
+            this.cursorX = cursorX;
+        }
         update();
 
     }
@@ -236,12 +302,15 @@ public class Builder {
     }
 
     public void setCursorY(int cursorY) {
-        this.cursorY = (cursorY - locationY) / TileModel.HEIGHT;;
+        cursorY = (cursorY - locationY) / TileModel.HEIGHT;
+        if (cursorY >= 0 && cursorY < scene.height) {
+            this.cursorY = cursorY;
+        }
         update();
     }
 
     public void update() {
-        viewer.setFrame(renderFrame(0, 0, WIDTH, HEIGHT));
+        viewer.setFrame(renderFrame());
     }
 
     public int getLocationX() {
@@ -263,21 +332,133 @@ public class Builder {
     }
 
     public void chose() {
-        ChoseTile choseTile = new ChoseTile(this);
         choseTile.setVisible(true);
+        setMode(Builder.PUT);
         update();
     }
 
     public void click() {
-        if (mode == DESTROY) {
-            scene.setTile(cursorX, cursorY, new Tile(null));
-        } else if (mode == PUT) {
-            if (actualTile != null) {
-                scene.setTile(cursorX, cursorY, new Tile(actualTile));
-            }
-        } else if (mode == COPY) {
-            setActualTile(scene.getTile(cursorX, cursorY).getTileModel());
-            mode = PUT;
+        switch (mode) {
+            case DESTROY:
+                scene.setTile(cursorX, cursorY, new Tile(null));
+                break;
+            case PUT:
+                if (actualTile != null) {
+                    scene.setTile(cursorX, cursorY, new Tile(actualTile));
+                }
+                break;
+            case COPY:
+                if (scene.getTile(cursorX, cursorY) != null && scene.getTile(cursorX, cursorY).getTileModel() != null) {
+                    setActualTile(scene.getTile(cursorX, cursorY).getTileModel());
+                    mode = PUT;
+                }
+                break;
+            default:
+                break;
         }
+        update();
+    }
+
+    public void exit() {
+        if (!saved) {
+            int op = JOptionPane.showConfirmDialog(null, "Deseja salvar as alterações?", "CrossAges Builder", JOptionPane.YES_NO_CANCEL_OPTION);
+            if (op == 2) {
+                return;
+            } else if (op == 0) {
+                save();
+            }
+        }
+        viewer.dispose();
+        choseTile.dispose();
+        tools.dispose();
+        System.exit(0);
+    }
+
+    public void saveAs() {
+        JFileChooser fc = new JFileChooser(file);
+        fc.setFileFilter(new SceneFileFilter());
+        if (fc.showSaveDialog(null) == 0) {
+            file = fc.getSelectedFile();
+            if (file != null) {
+                save();
+            }
+        }
+    }
+
+    public void export() {
+        JFileChooser fc = new JFileChooser(this.file.getParentFile());
+        fc.setFileFilter(new PNGImageFileFilter());
+        if (fc.showSaveDialog(null) == 0) {
+            File file = fc.getSelectedFile();
+            if (file != null) {
+                if (!file.getName().endsWith(".png")) {
+                    file = new File(file.getPath() + ".png");
+                }
+                BufferedImage image = new BufferedImage(scene.getWidth() * TileModel.WIDTH, scene.getHeight() * TileModel.HEIGHT, 2);
+                Graphics g = image.getGraphics();
+                scene.draw(g, 0, 0);
+                g.dispose();
+                try {
+                    ImageIO.write(image, "png", file);
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(null, "Não foi possivel exportar cenario.", "Erro - CrossAges Bulder", 0);
+                }
+            }
+        }
+    }
+
+    public void save() {
+        try {
+            if (file == null) {
+                saveAs();
+            } else {
+                if (!file.getName().endsWith(".scn")) {
+                    file = new File(file.getPath() + ".scn");
+                }
+                scene.export(new FileOutputStream(file));
+                saved = true;
+            }
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(null, "Não foi possivel salvar cenario.", "Erro - CrossAges Bulder", 0);
+        }
+    }
+
+    public void newFile() {
+        if (!saved) {
+            int op = JOptionPane.showConfirmDialog(null, "Deseja salvar as alterações?", "CrossAges Builder", JOptionPane.YES_NO_CANCEL_OPTION);
+            if (op == 2) {
+                return;
+            } else if (op == 0) {
+                save();
+            }
+        }
+        file = null;
+        saved = false;
+        scene = new Scene(sceneWidth, sceneHeight);
+        update();
+    }
+
+    public void open() {
+        if (!saved) {
+            int op = JOptionPane.showConfirmDialog(null, "Deseja salvar as alterações?", "CrossAges Builder", JOptionPane.YES_NO_CANCEL_OPTION);
+            if (op == 2) {
+                return;
+            } else if (op == 0) {
+                save();
+            }
+        }
+        JFileChooser fc = new JFileChooser(file);
+        fc.setFileFilter(new SceneFileFilter());
+        if (fc.showSaveDialog(null) == 0) {
+            try {
+                File file = fc.getSelectedFile();
+                scene = new Scene(new FileInputStream(file));
+                saved = true;
+                this.file = file;
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(null, "Não foi possivel abrir cenario.", "Erro - CrossAges Bulder", 0);
+            }
+        }
+        update();
     }
 }

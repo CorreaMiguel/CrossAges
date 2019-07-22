@@ -1,5 +1,7 @@
 package com.tabaproj.crossages.model;
 
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -21,29 +23,24 @@ public class Scene {
         this.tiles = new Tile[width][height];
     }
 
-    private Scene(InputStream input) {
+    public Scene(InputStream input) throws Exception {
         int width = 0;
         int height = 0;
         Tile[][] tiles = null;
-        try {
-            Scanner scanner = new Scanner(input);
-            int tilesMapCount = scanner.nextInt();
-            TileModel[] tilesMap = new TileModel[tilesMapCount];
-            for (int i = 0; i < tilesMapCount; i++) {
-                tilesMap[i] = TileModel.getTile(scanner.next());
+        Scanner scanner = new Scanner(input);
+        int tilesMapCount = scanner.nextInt();
+        TileModel[] tilesMap = new TileModel[tilesMapCount];
+        for (int i = 0; i < tilesMapCount; i++) {
+            tilesMap[i] = TileModel.getTile(scanner.next());
+        }
+        width = scanner.nextInt();
+        height = scanner.nextInt();
+        tiles = new Tile[width][height];
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int mapIndex = scanner.nextInt();
+                tiles[x][y] = new Tile(tilesMap[mapIndex]);
             }
-            width = scanner.nextInt();
-            height = scanner.nextInt();
-            tiles = new Tile[width][height];
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    int mapIndex = scanner.nextInt();
-                    tiles[x][y] = new Tile(tilesMap[mapIndex]);
-                }
-            }
-
-        } catch (Exception ex) {
-            System.err.println("Erro, não foi possivel importar um cenario.\n" + ex.getMessage());
         }
         this.width = width;
         this.height = height;
@@ -54,19 +51,26 @@ public class Scene {
         List<TileModel> map = new ArrayList<>();
         for (int x = 0; x < tiles.length; x++) {
             for (int y = 0; y < tiles[x].length; y++) {
-                if (!map.contains(tiles[x][y])) {
+                if (!map.contains(null) && tiles[x][y] == null || tiles[x][y].getTileModel() == null) {
+                    map.add(null);
+                }
+                if (!map.contains(tiles[x][y].getTileModel())) {
                     map.add(tiles[x][y].getTileModel());
                 }
             }
         }
         out.println(map.size());
         for (int i = 0; i < map.size(); i++) {
-            out.println(map.get(i));
+            if (map.get(i) == null) {
+                out.println("NULL");
+            } else {
+                out.println(map.get(i).getName());
+            }
         }
         out.printf("%d %d\n", width, height);
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                out.printf("%d ", map.indexOf(tiles[x][y]));
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                out.printf("%d ", tiles[x][y] == null ? map.indexOf(tiles[x][y]) : map.indexOf(tiles[x][y].getTileModel()));
             }
             out.println();
         }
@@ -92,8 +96,23 @@ public class Scene {
         return height;
     }
 
-    public void setTile(int cursorX, int cursorY, TileModel actualTile) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void setTile(int x, int y, TileModel tile) {
+        setTile(x, y, new Tile(tile));
+    }
+
+    public void draw(Graphics graphics, int locX, int locY) {
+        for (int x = 0; x < getWidth(); x++) {
+            for (int y = 0; y < getHeight(); y++) {
+                int pixX = x * TileModel.WIDTH + locX;
+                int pixY = y * TileModel.HEIGHT + locY;
+                if (x >= 0 && y >= 0 && x < getWidth() && y < getHeight()) {
+                    Tile model = getTile(x, y);
+                    if (model != null && model.getTileModel() != null) {
+                        graphics.drawImage(model.getTileModel().getPicture(), pixX, pixY, TileModel.WIDTH, TileModel.HEIGHT, null);
+                    }
+                }
+            }
+        }
     }
 
 }
