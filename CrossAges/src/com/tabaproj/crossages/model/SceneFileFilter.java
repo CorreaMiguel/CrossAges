@@ -15,6 +15,6 @@ public class SceneFileFilter extends FileFilter {
 
     @Override
     public String getDescription() {
-        return "Arquivos de canarios.";
+        return "Arquivos de cenarios.";
     }
 }

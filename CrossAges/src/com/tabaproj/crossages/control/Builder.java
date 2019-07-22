@@ -20,8 +20,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -129,7 +127,18 @@ public class Builder {
             @Override
             public void mousePressed(MouseEvent e) {
                 if (!e.isShiftDown()) {
-                    click();
+                    if (e.getButton() == e.BUTTON3) {
+                        if (mode == DESTROY) {
+                            setMode(PUT);
+                        } else {
+                            setMode(DESTROY);
+                        }
+                    } else {
+                        if (e.getButton() == e.BUTTON2) {
+                            setMode(COPY);
+                        }
+                        click();
+                    }
                 }
             }
 
@@ -155,6 +164,7 @@ public class Builder {
                     setLocationY(getLocationY() + e.getY() - y);
                 } else {
                     click();
+
                 }
                 setCursorX(e.getX());
                 setCursorY((e.getY() - 30));
