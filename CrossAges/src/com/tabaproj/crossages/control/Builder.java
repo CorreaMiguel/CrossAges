@@ -20,6 +20,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Stack;
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -27,7 +31,45 @@ import javax.swing.JOptionPane;
 
 public class Builder {
 
-    public static final int DESTROY = 0, PUT = 1, COPY = 2;
+    private static final List<TileModel> models = importTiles();
+
+    public static List<TileModel> importTiles() {
+        List<TileModel> tiles = new ArrayList<>();
+        File files = new File("CrossAges/data/tiles");
+        if (!files.exists() || files.isFile()) {
+            files.mkdirs();
+        } else {
+            for (File f : files.listFiles()) {
+                if (f.isFile() && f.canRead() && f.getAbsoluteFile().getPath().toLowerCase().endsWith(".data")) {
+                    try (InputStream in = new FileInputStream(f)) {
+                        TileModel tile = new TileModel(in);
+                        tiles.add(tile);
+                    } catch (IOException ex) {
+
+                    }
+                }
+            }
+        }
+        return tiles;
+    }
+
+    public static List<TileModel> getModels() {
+        return models;
+    }
+
+    public static TileModel getTile(String tile) {
+        if (tile.equalsIgnoreCase("null")) {
+            return null;
+        }
+        for (int i = 0; i < models.size(); i++) {
+            if (models.get(i).getName().equals(tile)) {
+                return models.get(i);
+            }
+        }
+        return null;
+    }
+
+    public static final int DESTROY = 0, PUT = 1, COPY = 2, FLOOD_FILL = 3;
 
     public static final int WIDTH = 800;
 
@@ -53,7 +95,7 @@ public class Builder {
     public Builder(int sceneWidth, int sceneHeight) {
         this.sceneWidth = sceneWidth;
         this.sceneHeight = sceneHeight;
-        this.scene = new Scene(sceneWidth, sceneHeight);
+        this.scene = new Scene(sceneWidth, sceneHeight, models);
         this.viewer = new Viewer(WIDTH, HEIGHT);
         this.viewer.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         this.tools = new ToolsFrame(this);
@@ -272,7 +314,7 @@ public class Builder {
     }
 
     private void resizeTiles() {
-        Scene newScene = new Scene(sceneWidth, sceneHeight);
+        Scene newScene = new Scene(sceneWidth, sceneHeight, models);
         for (int x = 0; x < sceneWidth && x < scene.getWidth(); x++) {
             for (int y = 0; y < sceneHeight && y < scene.getHeight(); y++) {
                 newScene.setTile(x, y, scene.getTile(x, y));
@@ -347,21 +389,72 @@ public class Builder {
         update();
     }
 
+    private static boolean compare(Object ob1, Object ob2) {
+        if (ob1 == ob2) {
+            return true;
+        }
+        if (ob1 == null) {
+            return false;
+        }
+        return ob1.equals(ob2);
+    }
+
+    private static class IntegerPoint {
+
+        final int x;
+        final int y;
+
+        public IntegerPoint(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+
+    }
+
+    public void floodFill() {
+        if (cursorX >= 0 && cursorY >= 0 && cursorX < scene.getWidth() && cursorY < scene.getHeight()) {
+            TileModel key = (scene.getTile(cursorX, cursorY) == null) ? null : scene.getTile(cursorX, cursorY).getTileModel();
+            if (compare(key, actualTile)) {
+                return;
+            }
+            Stack<IntegerPoint> primaryPoints = new Stack<>();
+            Stack<IntegerPoint> secundaryPoints = new Stack<>();
+            primaryPoints.add(new IntegerPoint(cursorX, cursorY));
+            while (!primaryPoints.isEmpty()) {
+                while (!primaryPoints.isEmpty()) {
+                    IntegerPoint point = primaryPoints.pop();
+                    secundaryPoints.add(new IntegerPoint(point.x - 1, point.y));
+                    secundaryPoints.add(new IntegerPoint(point.x, point.y - 1));
+                    secundaryPoints.add(new IntegerPoint(point.x + 1, point.y));
+                    secundaryPoints.add(new IntegerPoint(point.x, point.y + 1));
+                }
+                while (!secundaryPoints.isEmpty()) {
+                    IntegerPoint point = secundaryPoints.pop();
+                    if (point.x < scene.getWidth() && point.y < scene.getHeight() && point.x >= 0 && point.y >= 0 && compare(scene.getTile(point.x, point.y) == null ? null : scene.getTile(point.x, point.y).getTileModel(), key)) {
+                        primaryPoints.add(point);
+                        scene.setTile(point.x, point.y, new Tile(actualTile));
+                    }
+                }
+            }
+
+        }
+    }
+
     public void click() {
         switch (mode) {
             case DESTROY:
                 scene.setTile(cursorX, cursorY, new Tile(null));
                 break;
             case PUT:
-                if (actualTile != null) {
-                    scene.setTile(cursorX, cursorY, new Tile(actualTile));
-                }
+                scene.setTile(cursorX, cursorY, new Tile(actualTile));
                 break;
             case COPY:
-                if (scene.getTile(cursorX, cursorY) != null && scene.getTile(cursorX, cursorY).getTileModel() != null) {
-                    setActualTile(scene.getTile(cursorX, cursorY).getTileModel());
-                    mode = PUT;
-                }
+                setActualTile(scene.getTile(cursorX, cursorY).getTileModel());
+                mode = PUT;
+                break;
+            case FLOOD_FILL:
+                floodFill();
+                update();
                 break;
             default:
                 break;
@@ -444,7 +537,7 @@ public class Builder {
         }
         file = null;
         saved = false;
-        scene = new Scene(sceneWidth, sceneHeight);
+        scene = new Scene(sceneWidth, sceneHeight, models);
         update();
     }
 
@@ -462,7 +555,7 @@ public class Builder {
         if (fc.showSaveDialog(null) == 0) {
             try {
                 File file = fc.getSelectedFile();
-                scene = new Scene(new FileInputStream(file));
+                scene = new Scene(new FileInputStream(file), models);
                 saved = true;
                 this.file = file;
             } catch (Exception ex) {
@@ -471,4 +564,5 @@ public class Builder {
         }
         update();
     }
+
 }

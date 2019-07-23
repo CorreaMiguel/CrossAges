@@ -16,14 +16,14 @@ public class ChoseTile extends javax.swing.JFrame {
         initComponents();
         this.builder = builder;
         setTile(builder.getActualTile());
-        for (int i = 0; i < TileModel.getModels().size(); i++) {
+        for (int i = 0; i < Builder.getModels().size(); i++) {
             int x = i % 14, y = i / 14;
             JButton jbutton = new JButton();
-            jbutton.setIcon(new ImageIcon(TileModel.getModels().get(i).getPicture()));
+            jbutton.setIcon(new ImageIcon(Builder.getModels().get(i).getPicture()));
             jbutton.setBounds(x * (TileModel.WIDTH + 10) + 4, y * (TileModel.HEIGHT + 10) + 4, TileModel.WIDTH + 6, TileModel.HEIGHT + 6);
             final int index = i;
             jbutton.addActionListener((ActionEvent e) -> {
-                TileModel t = TileModel.getModels().get(index);
+                TileModel t = Builder.getModels().get(index);
                 if (t.equals(getTile())) {
                     builder.setActualTile(tile);
                     setVisible(false);
